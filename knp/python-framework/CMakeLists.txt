@@ -31,11 +31,6 @@ project(knp_python_framework VERSION "${KNP_VERSION}" LANGUAGES C CXX  # PYTHON
         DESCRIPTION "Kaspersky Neuromorphic Platform Python framework library"
         HOMEPAGE_URL "https://neuro.kaspersky.ru/neyromorfnye-tekhnologii/")
 
-if (MSVC)
-    message(STATUS "Temporarily cannot be built under Windows.")
-    return()
-endif()
-
 if (NOT KNP_PYTHON_FRAMEWORK_BUILD)
     message(STATUS "Python framework building disabled.")
     return()
@@ -43,13 +38,15 @@ endif()
 
 if (Boost_ROOT)
     set(Boost_USE_STATIC_LIBS ON)
-#    add_compile_definitions(-DBOOST_PYTHON_STATIC_LIB -DPy_NO_ENABLE_SHARED)
 endif()
 
-find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
-find_package(Boost ${KNP_BOOST_MIN_VERSION} COMPONENTS python CONFIG)
+#TEMP
+set(_KNP_PY_VER 310)
 
-if (NOT BOOST_PYTHON_FOUND)
+find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+find_package(Boost ${KNP_BOOST_MIN_VERSION} COMPONENTS python${_KNP_PY_VER} REQUIRED)
+
+if (NOT Boost_PYTHON${_KNP_PY_VER}_FOUND)
     file(GLOB _KNP_PY_VER "${BOOST_LIBRARYDIR}/*boost_python*.[lib|a]")
     if (_KNP_PY_VER)
         list(GET _KNP_PY_VER 0 _KNP_PY_VER)
