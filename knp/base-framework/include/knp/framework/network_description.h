@@ -40,47 +40,18 @@ namespace knp::framework
 class KNP_DECLSPEC NetworkDescription
 {
     /**
-     * @brief Get output populations
-     * @return Output populations
-     */
-    [[nodiscard]] inline const auto& get_output_populations() const { return output_populations_; }
-
-
-    /**
-     * @brief Get projections from inputs.
-     * @return Projections from inputs.
-     */
-    [[nodiscard]] inline const auto& get_projections_from_inputs() const { return projections_from_inputs_; }
-
-
-    /**
-     * @brief Get inference populations.
-     * @return Inference populations.
-     */
-    [[nodiscard]] inline const auto& get_inference_populations() const { return inference_populations_; }
-
-
-    /**
-     * @brief Get inference projections.
-     * @return Inference projections.
-     */
-    [[nodiscard]] inline const auto& get_inference_projections() const { return inference_projections_; }
-
-
-    /**
-     * @brief Get populations names.
-     * @return Populations names.
-     */
-    [[nodiscard]] inline const auto& get_populations_names() const { return populations_names_; }
-
-
-    /**
-     * @brief Get wta data.
-     * @return Wta data.
+     * @brief Get WTA data.
+     * @return WTA data.
      */
     [[nodiscard]] inline const auto& get_wta_data() const { return wta_data_; }
 
 public:
+    using PopulationDescriptor =
+        boost::adjacency_list_traits<boost::vecS, boost::vecS, boost::undirectedS>::vertex_descriptor;
+    using ProjectionDescriptor =
+        boost::adjacency_list_traits<boost::vecS, boost::vecS, boost::undirectedS>::edge_descriptor;
+
+
     struct PopulationDescription
     {
         static constexpr uint32_t INPUT = 1U << 0U;
@@ -102,9 +73,13 @@ public:
     };
 
     template <typename NeuronType>
-    [[nodiscard]] knp::core::UID add_population(
-        std::string_view name, const knp::neuron_traits::neuron_parameters<NeuronType>& parameter,
-        size_t neurons_amount, PopulationDescription::FlagsType flags = 0);
+    [[nodiscard]] inline PopulationDescriptor add_population(
+        std::string_view name, const knp::neuron_traits::neuron_parameters<NeuronType>& parameters,
+        size_t neurons_amount, PopulationDescription::FlagsType flags = 0)
+    {
+        return boost::add_vertex(
+            PopulationDescription{knp::core::UID{}, name, parameters, neurons_amount, flags}, network_graph_);
+    }
 
     struct ProjectionDescription
     {
@@ -139,13 +114,19 @@ public:
     };
 
     template <typename SynapseType>
-    [[nodiscard]] knp::core::UID add_projection(
-        std::string_view name, knp::core::UID presynaptic_population, knp::core::UID postsynaptic_population,
-        const knp::synapse_traits::synapse_parameters<SynapseType>& parameter,
-        const ProjectionDescription::CreatorType<SynapseType>& creator, PopulationDescription::FlagsType flags = 0);
+    [[nodiscard]] ProjectionDescriptor add_projection(
+        std::string_view name, PopulationDescriptor presynaptic_population,
+        PopulationDescriptor postsynaptic_population,
+        const knp::synapse_traits::synapse_parameters<SynapseType>& parameters,
+        const ProjectionDescription::CreatorType<SynapseType>& creator, PopulationDescription::FlagsType flags = 0)
+    {
+        boost::add_edge(
+            presynaptic_population, postsynaptic_population,
+            ProjectionDescription{knp::core::UID(), name, {parameters, creator}, flags}, network_graph_);
+    }
 
     void specify_wta_border(
-        const knp::core::UID& population_uid, const knp::core::UID& projection_uid, std::vector<size_t> borders);
+        const knp::core::UID& population_uid, const knp::core::UID& projection_uid, const std::vector<size_t>& borders);
 
 private:
     boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS, PopulationDescription, ProjectionDescription>
