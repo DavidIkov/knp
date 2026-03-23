@@ -59,22 +59,4 @@ const std::unordered_multimap<core::UID, core::UID, core::uid_hash> &Model::get_
     return out_channels_;
 }
 
-
-namespace nt = knp::neuron_traits;
-
-#define INSTANCE_POPULATION_FUNCTIONS(n, template_for_instance, neuron_type)      \
-    template KNP_DECLSPEC void Model::connect_output_population<nt::neuron_type>( \
-        const core::UID &, const core::Population<nt::neuron_type> &);
-
-namespace st = knp::synapse_traits;
-
-#define INSTANCE_PROJECTION_FUNCTIONS(n, template_for_instance, synapse_type)     \
-    template KNP_DECLSPEC void Model::connect_input_projection<st::synapse_type>( \
-        const core::UID &, const core::Projection<st::synapse_type> &);
-
-// cppcheck-suppress unknownMacro
-BOOST_PP_SEQ_FOR_EACH(INSTANCE_POPULATION_FUNCTIONS, "", BOOST_PP_VARIADIC_TO_SEQ(ALL_NEURONS))
-// cppcheck-suppress unknownMacro
-BOOST_PP_SEQ_FOR_EACH(INSTANCE_PROJECTION_FUNCTIONS, "", BOOST_PP_VARIADIC_TO_SEQ(ALL_SYNAPSES))
-
 }  // namespace knp::framework
