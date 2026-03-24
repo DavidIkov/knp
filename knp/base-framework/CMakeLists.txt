@@ -52,6 +52,8 @@ knp_add_library("${PROJECT_NAME}-core"
     impl/storage/native/data_storage_json.cpp
     impl/storage/native/data_storage_hdf5.cpp
     impl/network.cpp
+    impl/network_description.cpp
+    impl/network_loader.cpp
     impl/model.cpp
     impl/model_executor.cpp
     impl/model_loader.cpp

@@ -39,13 +39,15 @@ namespace knp::framework
 {
 class KNP_DECLSPEC NetworkDescription
 {
+public:
     /**
      * @brief Get WTA data.
      * @return WTA data.
      */
     [[nodiscard]] inline const auto& get_wta_data() const { return wta_data_; }
 
-public:
+    [[nodiscard]] inline const auto& get_network_graph() const { return network_graph_; }
+
     using PopulationDescriptor =
         boost::adjacency_list_traits<boost::vecS, boost::vecS, boost::undirectedS>::vertex_descriptor;
     using ProjectionDescriptor =
@@ -85,13 +87,12 @@ public:
     {
         static constexpr uint32_t INPUT = 1U << 0U;
         static constexpr uint32_t OUTPUT = 1U << 1U;
-        static constexpr uint32_t CHANNELED = 1U << 2U;
+        static constexpr uint32_t TRAINABLE = 1U << 2U;
         static constexpr uint32_t INFERENCE = 1U << 3U;
         static constexpr uint32_t WTA = 1U << 4U;
 
         template <typename SynapseType>
-        using CreatorType = std::function<knp::core::Projection<SynapseType>(
-            const knp::core::UID&, const knp::core::UID&, size_t, size_t)>;
+        using CreatorType = std::function<knp::core::Projection<SynapseType>(const ProjectionDescription&)>;
 
         template <typename SynapseType>
         struct TypeDependentInfo
@@ -129,10 +130,10 @@ public:
         const knp::core::UID& population_uid, const knp::core::UID& projection_uid, const std::vector<size_t>& borders);
 
 private:
-    boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS, PopulationDescription, ProjectionDescription>
+    boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS, PopulationDescription, ProjectionDescription>
         network_graph_;
 
-    struct KNP_DECLSPEC WTAData
+    struct WTAData
     {
         knp::core::UID population_;
         knp::core::UID projection_;
