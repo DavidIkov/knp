@@ -43,4 +43,14 @@ template <typename NeuronType>
 struct default_values;
 
 
+template <typename>
+struct neuron_type;
+
+template <typename NeuronType>
+struct neuron_type<neuron_parameters<NeuronType>>
+{
+    using t = NeuronType;
+};
+
+
 }  // namespace knp::neuron_traits

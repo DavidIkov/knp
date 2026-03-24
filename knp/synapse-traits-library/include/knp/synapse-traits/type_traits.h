@@ -51,4 +51,15 @@ template <typename SynapseType>
 struct shared_synapse_parameters
 {
 };
+
+template <typename>
+struct synapse_type;
+
+template <typename SynapseType>
+struct synapse_type<synapse_parameters<SynapseType>>
+{
+    using t = SynapseType;
+};
+
+
 }  // namespace knp::synapse_traits
