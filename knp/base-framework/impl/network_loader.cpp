@@ -19,9 +19,8 @@
  * limitations under the License.
  */
 
-#pragma once
-
 #include <knp/framework/network_loader.h>
+#include <knp/framework/projection/wta.h>
 
 #include <spdlog/spdlog.h>
 
@@ -40,6 +39,7 @@ void NetworkLoader::run_checks()
 {
     // TODO Add checks.
 }
+
 Network NetworkLoader::generate_network()
 {
     Network network;
@@ -90,7 +90,24 @@ Network NetworkLoader::generate_network()
 }
 void NetworkLoader::load_other_stuff()
 {
-    //TODO
+    const auto& graph = network_description_.get_network_graph();
+    const auto& wta_data = network_description_.get_wta_data();
+    for (const auto& data : wta_data)
+    {
+        const auto& pop = graph[data.population_];
+        const auto& proj = graph[data.projection_];
+        if (!(pop.flags_ & NetworkDescription::PopulationDescription::WTA))
+        {
+            SPDLOG_WARN("Population \"{}\" does not have WTA flag.", pop.name_);
+        }
+        if (!(proj.flags_ & NetworkDescription::ProjectionDescription::WTA))
+        {
+            SPDLOG_WARN("Projection \"{}\" does not have WTA flag.", proj.name_);
+        }
+        knp::framework::projection::add_wta_handlers(
+            model_executor_, data.winners_amount_, data.borders_, {{{pop.uid_}, {proj.uid_}}});
+        //TODO Maybe add logging for WTA.
+    }
 }
 
 }  //namespace knp::framework

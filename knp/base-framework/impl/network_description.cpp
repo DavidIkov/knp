@@ -28,9 +28,10 @@
 namespace knp::framework
 {
 void NetworkDescription::specify_wta_border(
-    const knp::core::UID& population_uid, const knp::core::UID& projection_uid, const std::vector<size_t>& borders)
+    PopulationDescriptor population_uid, ProjectionDescriptor projection_uid, size_t winners_amount,
+    const std::vector<size_t>& borders)
 {
-    wta_data_.emplace_back(WTAData{population_uid, projection_uid, borders});
+    wta_data_.emplace_back(WTAData{population_uid, projection_uid, winners_amount, borders});
 }
 
 /*

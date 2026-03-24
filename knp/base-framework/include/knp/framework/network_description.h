@@ -49,9 +49,9 @@ public:
     [[nodiscard]] inline const auto& get_network_graph() const { return network_graph_; }
 
     using PopulationDescriptor =
-        boost::adjacency_list_traits<boost::vecS, boost::vecS, boost::undirectedS>::vertex_descriptor;
+        boost::adjacency_list_traits<boost::vecS, boost::vecS, boost::directedS>::vertex_descriptor;
     using ProjectionDescriptor =
-        boost::adjacency_list_traits<boost::vecS, boost::vecS, boost::undirectedS>::edge_descriptor;
+        boost::adjacency_list_traits<boost::vecS, boost::vecS, boost::directedS>::edge_descriptor;
 
 
     struct PopulationDescription
@@ -121,13 +121,15 @@ public:
         const knp::synapse_traits::synapse_parameters<SynapseType>& parameters,
         const ProjectionDescription::CreatorType<SynapseType>& creator, PopulationDescription::FlagsType flags = 0)
     {
-        boost::add_edge(
-            presynaptic_population, postsynaptic_population,
-            ProjectionDescription{knp::core::UID(), name, {parameters, creator}, flags}, network_graph_);
+        return boost::add_edge(
+                   presynaptic_population, postsynaptic_population,
+                   ProjectionDescription{knp::core::UID(), name, {parameters, creator}, flags}, network_graph_)
+            .first;
     }
 
     void specify_wta_border(
-        const knp::core::UID& population_uid, const knp::core::UID& projection_uid, const std::vector<size_t>& borders);
+        PopulationDescriptor population_uid, ProjectionDescriptor projection_uid, size_t winners_amount,
+        const std::vector<size_t>& borders);
 
 private:
     boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS, PopulationDescription, ProjectionDescription>
@@ -135,8 +137,9 @@ private:
 
     struct WTAData
     {
-        knp::core::UID population_;
-        knp::core::UID projection_;
+        PopulationDescriptor population_;
+        ProjectionDescriptor projection_;
+        size_t winners_amount_;
         std::vector<size_t> borders_;
     };
 
